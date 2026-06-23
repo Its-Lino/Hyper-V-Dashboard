@@ -11,7 +11,7 @@ FastAPI based dashboard for managing local Hyper-V Virtual Machines remotely.
 
 ## Installation
 
-1. Download the latest `.exe` from **Releases**
+1. Download the latest `.exe` from **[Releases](https://github.com/Its-Lino/Hyper-V-Dashboard/releases)**
 2. Run the application
 
 The app creates config, logs, and Discord message state under the current user's
