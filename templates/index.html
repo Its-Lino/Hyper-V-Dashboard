@@ -1,0 +1,620 @@
+<!doctype html>
+<html lang="en" data-bs-theme="dark">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="csrf-token" content="{{ csrf_token }}">
+  <title>{{ title }}</title>
+
+  <link rel="icon" href="/favicon.ico">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg: #0b1120;
+      --panel: rgba(15, 23, 42, 0.84);
+      --panel-strong: #111827;
+      --border: rgba(148, 163, 184, 0.16);
+      --muted: #94a3b8;
+      --text: #e5e7eb;
+      --accent: #38bdf8;
+      --blue: #2563eb;
+      --green: #16a34a;
+      --amber: #d97706;
+      --red: #dc2626;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at top left, rgba(37, 99, 235, 0.24), transparent 34rem),
+        radial-gradient(circle at top right, rgba(56, 189, 248, 0.14), transparent 28rem),
+        var(--bg);
+      color: var(--text);
+    }
+
+    .app-navbar {
+      backdrop-filter: blur(18px);
+      background: rgba(15, 23, 42, 0.78);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .brand-icon {
+      height: 32px;
+      width: 32px;
+    }
+
+    .app-shell {
+      display: flex;
+      flex: 1;
+      flex-direction: column;
+      max-width: 1180px;
+      padding: 2rem 1rem 3rem;
+    }
+
+    .page-header {
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+    }
+
+    .status-pill,
+    .version-pill {
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 0.45rem 0.75rem;
+    }
+
+    .status-pill {
+      background: rgba(71, 85, 105, 0.36);
+    }
+
+    .version-pill {
+      background: rgba(37, 99, 235, 0.18);
+      color: #bfdbfe;
+    }
+
+    .metric-card,
+    .vm-card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      box-shadow: 0 18px 50px rgba(2, 6, 23, 0.22);
+    }
+
+    .metric-card {
+      border-radius: 18px;
+      padding: 1.15rem;
+    }
+
+    .metric-icon {
+      align-items: center;
+      background: rgba(37, 99, 235, 0.16);
+      border-radius: 14px;
+      color: #93c5fd;
+      display: inline-flex;
+      height: 44px;
+      justify-content: center;
+      width: 44px;
+    }
+
+    .metric-value {
+      font-size: 2rem;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .metric-label,
+    .vm-meta,
+    .empty-state {
+      color: var(--muted);
+    }
+
+    .vm-card {
+      border-radius: 20px;
+      overflow: hidden;
+      transition: transform 140ms ease, border-color 140ms ease, box-shadow 140ms ease;
+    }
+
+    .vm-card:hover {
+      border-color: rgba(56, 189, 248, 0.34);
+      box-shadow: 0 22px 70px rgba(2, 6, 23, 0.34);
+      transform: translateY(-2px);
+    }
+
+    .vm-card-header {
+      background: rgba(15, 23, 42, 0.64);
+      border-bottom: 1px solid var(--border);
+      padding: 1rem;
+    }
+
+    .vm-name {
+      font-weight: 650;
+    }
+
+    .vm-body {
+      padding: 1rem;
+    }
+
+    .resource-grid {
+      display: grid;
+      gap: 0.65rem;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      margin-bottom: 1rem;
+    }
+
+    .resource-tile {
+      background: rgba(15, 23, 42, 0.54);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 0.75rem;
+    }
+
+    .resource-label {
+      color: var(--muted);
+      font-size: 0.72rem;
+      text-transform: uppercase;
+    }
+
+    .resource-value {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-top: 0.2rem;
+    }
+
+    .detail-row {
+      align-items: center;
+      display: flex;
+      gap: 0.65rem;
+      min-height: 1.75rem;
+    }
+
+    .detail-icon {
+      color: var(--accent);
+      width: 1rem;
+    }
+
+    .vm-actions {
+      border-top: 1px solid var(--border);
+      display: grid;
+      gap: 0.5rem;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      padding: 1rem;
+    }
+
+    .vm-actions .btn {
+      border: 0;
+      font-weight: 600;
+    }
+
+    .btn-success {
+      background-color: var(--green);
+    }
+
+    .btn-warning {
+      background-color: var(--amber);
+      color: #111827;
+    }
+
+    .btn-primary {
+      background-color: var(--blue);
+    }
+
+    .badge {
+      font-weight: 600;
+      padding: 0.45rem 0.65rem;
+    }
+
+    .empty-state {
+      border: 1px dashed var(--border);
+      border-radius: 18px;
+      padding: 2rem;
+      text-align: center;
+    }
+
+    .app-footer {
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 0.875rem;
+      margin-top: auto;
+      padding-top: 1rem;
+    }
+
+    .app-footer a {
+      color: #93c5fd;
+      text-decoration: none;
+    }
+
+    .app-footer a:hover {
+      color: #bfdbfe;
+      text-decoration: underline;
+    }
+
+    @media (max-width: 575.98px) {
+      .app-shell {
+        padding: 1rem 0.75rem 2rem;
+      }
+
+      .page-header {
+        margin-bottom: 1rem;
+        padding-bottom: 0.75rem;
+      }
+
+      .page-header h1 {
+        font-size: 1.35rem;
+      }
+
+      .metric-card {
+        border-radius: 14px;
+        padding: 0.85rem;
+      }
+
+      .metric-icon {
+        height: 34px;
+        width: 34px;
+      }
+
+      .metric-value {
+        font-size: 1.45rem;
+      }
+
+      .metric-label {
+        font-size: 0.68rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <nav class="navbar navbar-dark app-navbar sticky-top">
+    <div class="container-fluid px-3 px-lg-4">
+      <span class="navbar-brand mb-0 h5 d-flex align-items-center gap-2">
+        <img class="brand-icon" src="/favicon.ico" alt="">
+        {{ title }}
+      </span>
+      <div class="d-flex align-items-center gap-2">
+        <span class="version-pill small">v{{ version }}</span>
+        <span id="ws-status" class="status-pill small">Connecting...</span>
+        <form method="post" action="/logout" class="m-0">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+          <button class="btn btn-outline-light btn-sm" type="submit">
+            <i class="bi bi-box-arrow-right"></i> Logout
+          </button>
+        </form>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container app-shell">
+    <section class="page-header d-flex flex-column flex-lg-row justify-content-between gap-3">
+      <div>
+        <h1 class="h3 mb-1">Virtual machines</h1>
+        <p class="vm-meta mb-0">Live Hyper-V status and power controls for this host.</p>
+      </div>
+      <div class="d-flex gap-2 align-items-start">
+        <span class="badge bg-success-subtle text-success-emphasis">
+          <i class="bi bi-shield-lock"></i> Authenticated
+        </span>
+      </div>
+    </section>
+
+    <section class="row g-3 mb-4">
+      <div class="col-6 col-xl-3">
+        <div class="metric-card h-100">
+          <div class="d-flex align-items-center justify-content-between">
+            <div>
+              <div class="metric-label small text-uppercase">Total VMs</div>
+              <div id="total-vms" class="metric-value mt-2">0</div>
+            </div>
+            <span class="metric-icon">
+              <i class="bi bi-hdd-network"></i>
+            </span>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-xl-3">
+        <div class="metric-card h-100">
+          <div class="d-flex align-items-center justify-content-between">
+            <div>
+              <div class="metric-label small text-uppercase">Running</div>
+              <div id="running-vms" class="metric-value mt-2">0</div>
+            </div>
+            <span class="metric-icon">
+              <i class="bi bi-play-circle"></i>
+            </span>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-xl-3">
+        <div class="metric-card h-100">
+          <div class="d-flex align-items-center justify-content-between">
+            <div>
+              <div class="metric-label small text-uppercase">Avg CPU</div>
+              <div id="average-cpu" class="metric-value mt-2">0%</div>
+            </div>
+            <span class="metric-icon">
+              <i class="bi bi-cpu"></i>
+            </span>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-xl-3">
+        <div class="metric-card h-100">
+          <div class="d-flex align-items-center justify-content-between">
+            <div>
+              <div class="metric-label small text-uppercase">Assigned RAM</div>
+              <div id="assigned-memory" class="metric-value mt-2">N/A</div>
+            </div>
+            <span class="metric-icon">
+              <i class="bi bi-memory"></i>
+            </span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div id="action-alert" class="alert alert-danger d-none" role="alert"></div>
+
+    <section class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4" id="vm-container"></section>
+    <p id="empty-state" class="empty-state d-none mt-3">No virtual machines found.</p>
+
+    <footer class="app-footer d-flex flex-column flex-sm-row justify-content-between gap-2">
+      <span>Created by {{ creator }}</span>
+      <a href="{{ repository_url }}" target="_blank" rel="noreferrer">
+        <i class="bi bi-github"></i> View on GitHub
+      </a>
+    </footer>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    const pendingActions = new Set();
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+    const actionAlert = document.getElementById("action-alert");
+
+    function showActionError(message) {
+      actionAlert.innerText = message;
+      actionAlert.classList.remove("d-none");
+    }
+
+    function clearActionError() {
+      actionAlert.classList.add("d-none");
+      actionAlert.innerText = "";
+    }
+
+    function escapeHTML(value) {
+      return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function getStateBadge(state) {
+      if (state === "Running") return "bg-success";
+      if (state === "Off") return "bg-danger";
+      return "bg-secondary";
+    }
+
+    function getHeartbeatClass(heartbeat) {
+      if (heartbeat === "OK") return "text-success";
+      if (heartbeat === "No Contact") return "text-danger";
+      return "text-warning";
+    }
+
+    function formatBytes(value) {
+      const bytes = Number(value || 0);
+      if (!Number.isFinite(bytes) || bytes <= 0) return "N/A";
+
+      const units = ["B", "KB", "MB", "GB", "TB"];
+      let size = bytes;
+      let unitIndex = 0;
+
+      while (size >= 1024 && unitIndex < units.length - 1) {
+        size /= 1024;
+        unitIndex += 1;
+      }
+
+      return `${size.toFixed(1)} ${units[unitIndex]}`;
+    }
+
+    function renderVMs(vms) {
+      const container = document.getElementById("vm-container");
+      const emptyState = document.getElementById("empty-state");
+      const totalCpu = vms.reduce((sum, vm) => sum + Number(vm.CPUUsage || 0), 0);
+      const assignedMemory = vms.reduce((sum, vm) => sum + Number(vm.MemoryAssigned || 0), 0);
+      const averageCpu = vms.length ? Math.round(totalCpu / vms.length) : 0;
+
+      document.getElementById("total-vms").innerText = vms.length;
+      document.getElementById("running-vms").innerText =
+        vms.filter((vm) => vm.State === "Running").length;
+      document.getElementById("average-cpu").innerText = `${averageCpu}%`;
+      document.getElementById("assigned-memory").innerText = formatBytes(assignedMemory);
+
+      emptyState.classList.toggle("d-none", vms.length !== 0);
+
+      container.innerHTML = vms.map((vm) => {
+        const name = escapeHTML(vm.Name);
+        const state = escapeHTML(vm.State);
+        const uptime = escapeHTML(vm.UptimeFormatted);
+        const status = escapeHTML(vm.Status);
+        const heartbeat = escapeHTML(vm.Heartbeat);
+        const cpuUsage = escapeHTML(vm.CPUUsageFormatted);
+        const processorCount = escapeHTML(vm.ProcessorCountFormatted);
+        const memoryAssigned = escapeHTML(vm.MemoryAssignedFormatted);
+        const memoryUsed = escapeHTML(vm.MemoryUsedFormatted);
+        const statusClass = String(vm.Status ?? "").toLowerCase().includes("normal")
+          ? "text-secondary"
+          : "text-warning";
+
+        return `
+          <div class="col">
+            <article class="vm-card h-100">
+              <div class="vm-card-header d-flex justify-content-between align-items-start gap-3">
+                <div>
+                  <div class="vm-name">
+                    <i class="bi bi-pc-display-horizontal text-info"></i> ${name}
+                  </div>
+                  <div class="vm-meta small mt-1">Hyper-V virtual machine</div>
+                </div>
+                <span class="badge ${getStateBadge(vm.State)}">${state}</span>
+              </div>
+
+              <div class="vm-body">
+                <div class="resource-grid">
+                  <div class="resource-tile">
+                    <div class="resource-label">CPU Usage</div>
+                    <div class="resource-value">${cpuUsage}</div>
+                  </div>
+                  <div class="resource-tile">
+                    <div class="resource-label">vCPU</div>
+                    <div class="resource-value">${processorCount}</div>
+                  </div>
+                  <div class="resource-tile">
+                    <div class="resource-label">RAM Assigned</div>
+                    <div class="resource-value">${memoryAssigned}</div>
+                  </div>
+                  <div class="resource-tile">
+                    <div class="resource-label">RAM Used</div>
+                    <div class="resource-value">${memoryUsed}</div>
+                  </div>
+                </div>
+
+                <div class="detail-row mb-2">
+                  <i class="bi bi-clock-history detail-icon"></i>
+                  <span class="vm-meta">Uptime</span>
+                  <span class="ms-auto">${uptime}</span>
+                </div>
+
+                ${vm.Status ? `
+                  <div class="detail-row mb-2">
+                    <i class="bi bi-activity detail-icon"></i>
+                    <span class="${statusClass}">${status}</span>
+                  </div>
+                ` : ""}
+
+                ${vm.Heartbeat ? `
+                  <div class="detail-row">
+                    <i class="bi bi-heart-pulse detail-icon"></i>
+                    <span class="${getHeartbeatClass(vm.Heartbeat)}">${heartbeat}</span>
+                  </div>
+                ` : ""}
+              </div>
+
+              <div class="vm-actions">
+                <button class="btn btn-success btn-sm"
+                  data-vm="${name}"
+                  data-action="start"
+                  onclick="handleAction(this)"
+                  aria-label="Start ${name}">
+                  <i class="bi bi-play-fill"></i> Start
+                </button>
+
+                <button class="btn btn-warning btn-sm"
+                  data-vm="${name}"
+                  data-action="stop"
+                  onclick="handleAction(this)"
+                  aria-label="Stop ${name}">
+                  <i class="bi bi-stop-fill"></i> Stop
+                </button>
+
+                <button class="btn btn-primary btn-sm"
+                  data-vm="${name}"
+                  data-action="restart"
+                  onclick="handleAction(this)"
+                  aria-label="Restart ${name}">
+                  <i class="bi bi-arrow-repeat"></i> Restart
+                </button>
+              </div>
+            </article>
+          </div>`;
+      }).join("");
+    }
+
+    async function handleAction(button) {
+      const vm = button.dataset.vm;
+      const action = button.dataset.action;
+      const key = `${vm}:${action}`;
+
+      if (pendingActions.has(key)) return;
+
+      clearActionError();
+      pendingActions.add(key);
+
+      const buttons = button.closest(".vm-actions").querySelectorAll("button");
+      buttons.forEach((btn) => {
+        btn.disabled = true;
+      });
+
+      const originalHTML = button.innerHTML;
+      button.innerHTML = `<span class="spinner-border spinner-border-sm"></span>`;
+
+      try {
+        const response = await fetch(`/vm/${action}/${encodeURIComponent(vm)}`, {
+          method: "POST",
+          headers: {
+            "X-CSRF-Token": csrfToken,
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(await response.text());
+        }
+
+        setTimeout(() => {
+          pendingActions.delete(key);
+        }, 1500);
+
+        setTimeout(() => {
+          if (!button.isConnected) return;
+
+          button.innerHTML = originalHTML;
+          buttons.forEach((btn) => {
+            btn.disabled = false;
+          });
+        }, 5000);
+      } catch (error) {
+        console.error("Action failed:", error);
+        showActionError(`Failed to ${action} ${vm}. Check app.log for details.`);
+        button.innerHTML = originalHTML;
+        buttons.forEach((btn) => {
+          btn.disabled = false;
+        });
+        pendingActions.delete(key);
+      }
+    }
+
+    function connectWS() {
+      const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+      const socket = new WebSocket(`${protocol}//${window.location.host}/ws`);
+
+      socket.onopen = () => {
+        const element = document.getElementById("ws-status");
+        element.innerText = "Connected";
+        element.className = "status-pill small bg-success-subtle text-success-emphasis";
+      };
+
+      socket.onmessage = (event) => {
+        renderVMs(JSON.parse(event.data));
+      };
+
+      socket.onclose = () => {
+        const element = document.getElementById("ws-status");
+        element.innerText = "Disconnected";
+        element.className = "status-pill small bg-danger-subtle text-danger-emphasis";
+
+        setTimeout(connectWS, 2000);
+      };
+    }
+
+    renderVMs({{ vms | tojson }});
+    connectWS();
+  </script>
+</body>
+
+</html>

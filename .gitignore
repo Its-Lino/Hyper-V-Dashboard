@@ -1,0 +1,14 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+
+app.log
+app.log.*
+config.json
+vm_message_ids.json
+
+assets/hyperv-dashboard.ico
+build/
+dist/
+*.spec
