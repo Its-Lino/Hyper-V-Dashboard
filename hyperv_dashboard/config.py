@@ -145,7 +145,16 @@ def apply_config(loaded_config: dict[str, Any]) -> None:
         config = loaded_config
         server_config = config.get("server", {})
         discord_config = config.get("discord", {})
-        notification_config = config.get("notifications", {})
+        
+        notification_config_raw = config.get("notifications", {})
+
+        if isinstance(notification_config_raw, dict):
+            notification_config = notification_config_raw
+        elif isinstance(notification_config_raw, bool):
+            notification_config = {"enabled": notification_config_raw}
+        else:
+            notification_config = {}
+
         updates_config = config.get("updates", {})
         logging_config = config.get("logging", {})
         auth_config = config.get("auth", {})
